@@ -255,14 +255,14 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#67c5bf] shadow-sm">
                     <span className="text-sm font-black text-white">✕</span>
                   </div>
-                  <span className="text-[10px] font-bold text-[#3d302c]">Tap 1: X</span>
+                  <span className="text-[10px] font-bold text-[#3d302c]">Tap 1: ✕</span>
                 </div>
                 <span className="font-black text-[#8b746d]">➔</span>
                 <div className="flex flex-col items-center gap-1">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#67c5bf] shadow-sm">
-                    <Image src="/assets/cat.webp" alt="Cat" width={24} height={24} className="h-6 w-6 object-contain" />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f8f6ef] ring-1 ring-[#eaded8]">
+                    <span className="h-2 w-2 rounded-full bg-[#eaded8]" />
                   </div>
-                  <span className="text-[10px] font-bold text-[#559c68]">Tap 2: 🐱</span>
+                  <span className="text-[10px] font-bold text-[#559c68]">Tap 2: Clear</span>
                 </div>
               </div>
 
@@ -272,7 +272,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
 
               <div className="mt-2 w-full rounded-2xl bg-[#f8f6ef] p-3 text-left text-xs text-[#6f5651] ring-1 ring-[#eaded8]/60 space-y-1.5">
                 <p>
-                  • <strong>Single Tap:</strong> Cycle between <em>Empty</em> ➔ <em>✕</em> ➔ <em>Cat</em>.
+                  • <strong>Single Tap:</strong> Tap to mark <em>✕</em>, or tap a marked box again to <em>Deselect</em>.
+                </p>
+                <p>
+                  • <strong>Double-Tap / Right-Click:</strong> Place or remove a cat 🐱 on any cell.
                 </p>
                 <p>
                   • <strong>Hold & Drag:</strong> Click and drag your cursor over multiple squares to quickly mark them with ✕!

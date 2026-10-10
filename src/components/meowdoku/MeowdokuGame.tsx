@@ -50,6 +50,11 @@ export const MeowdokuGame: React.FC = () => {
   const [statusMessage, setStatusMessage] = useState<string>("Start from the locked cat.");
 
   // Modals & stats
+  const lastMistakeRef = useRef<{
+    row: number;
+    col: number;
+    time: number;
+  } | null>(null);
   const [isLevelSelectorOpen, setIsLevelSelectorOpen] = useState(false);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
@@ -207,7 +212,7 @@ export const MeowdokuGame: React.FC = () => {
     setIsOnboardingOpen(false);
   };
 
-  // Single cell click cycle: Empty -> X -> Cat -> Empty
+  // Single-click toggles between mark (X) and empty (deselects checked/occupied cells)
   const handleCellClick = (row: number, col: number) => {
     if (isComplete) {
       setStatusMessage("This level is complete. Choose next level to continue.");
@@ -223,16 +228,60 @@ export const MeowdokuGame: React.FC = () => {
 
     const currentCell = board[row][col];
     let nextCell: CellState = "empty";
-    if (currentCell === "empty") nextCell = "x";
-    else if (currentCell === "x") nextCell = "cat";
-    else nextCell = "empty";
+    // If empty -> mark with X
+    // If already marked with X or Cat (checked box) -> deselect back to empty!
+    if (currentCell === "empty") {
+      nextCell = "x";
+    } else {
+      nextCell = "empty";
+    }
 
-    // Validate placement against solution to enforce lives system
-    if (nextCell === "cat") {
+    const pos = `row ${row + 1}, column ${col + 1}`;
+    lastMistakeRef.current = null;
+    if (nextCell === "x") {
+      setStatusMessage(`Marked ${pos} with X.`);
+    } else {
+      setStatusMessage(`Deselected ${pos}.`);
+    }
+
+    const newBoard = cloneBoard(board);
+    newBoard[row][col] = nextCell;
+
+    setHistory((prev) => [...prev, cloneBoard(board)]);
+    setBoard(newBoard);
+    saveActiveBoard(difficulty, currentLevel.id, newBoard);
+    setHintCell(null);
+  };
+
+  // Double-click or Right-click places a Cat (or deselects Cat if already present)
+  const handleCellDoubleClick = useCallback(
+    (row: number, col: number) => {
+      if (isComplete || isGameOver || isFixedCat(currentLevel, row, col)) {
+        return;
+      }
+
+      const currentCell = board[row][col];
+      const pos = `row ${row + 1}, column ${col + 1}`;
+
+      // If already a cat, deselect it back to empty
+      if (currentCell === "cat") {
+        const newBoard = cloneBoard(board);
+        newBoard[row][col] = "empty";
+        setHistory((prev) => [...prev, cloneBoard(board)]);
+        setBoard(newBoard);
+        saveActiveBoard(difficulty, currentLevel.id, newBoard);
+        setHintCell(null);
+        setStatusMessage(`Deselected cat at ${pos}.`);
+        return;
+      }
+
+      // Otherwise place a Cat
       const isSolutionCat = currentLevel.solution.some(
         (s) => s.row === row && s.col === col
       );
+
       if (!isSolutionCat) {
+        lastMistakeRef.current = { row, col, time: Date.now() };
         const nextLives = Math.max(0, lives - 1);
         setLives(nextLives);
         if (nextLives <= 0) {
@@ -244,25 +293,29 @@ export const MeowdokuGame: React.FC = () => {
           );
         }
       } else {
-        const pos = `row ${row + 1}, column ${col + 1}`;
+        lastMistakeRef.current = null;
         setStatusMessage(`Placed a cat at ${pos}.`);
       }
-    } else if (nextCell === "x") {
-      const pos = `row ${row + 1}, column ${col + 1}`;
-      setStatusMessage(`Marked ${pos} with X.`);
-    } else {
-      const pos = `row ${row + 1}, column ${col + 1}`;
-      setStatusMessage(`Cleared ${pos}.`);
-    }
 
-    const newBoard = cloneBoard(board);
-    newBoard[row][col] = nextCell;
+      const newBoard = cloneBoard(board);
+      newBoard[row][col] = "cat";
 
-    setHistory((prev) => [...prev, cloneBoard(board)]);
-    setBoard(newBoard);
-    saveActiveBoard(difficulty, currentLevel.id, newBoard);
-    setHintCell(null);
-  };
+      // If previous move in history was on this cell from the 1st tap of the double-click gesture,
+      // collapse history so Undo reverts cleanly back to the state before the gesture!
+      setHistory((prev) => {
+        const lastBoard = prev[prev.length - 1];
+        if (lastBoard && lastBoard[row][col] === "empty") {
+          return prev;
+        }
+        return [...prev, cloneBoard(board)];
+      });
+
+      setBoard(newBoard);
+      saveActiveBoard(difficulty, currentLevel.id, newBoard);
+      setHintCell(null);
+    },
+    [isComplete, isGameOver, currentLevel, board, lives, difficulty]
+  );
 
   // Drag bulk-mark empty cells as X using functional state updater
   const handleDragMark = useCallback(
@@ -577,6 +630,7 @@ export const MeowdokuGame: React.FC = () => {
               isComplete={isComplete}
               dragPreview={dragPreview}
               onCellClick={handleCellClick}
+              onCellDoubleClick={handleCellDoubleClick}
               onDragMark={handleDragMark}
               onDragPreviewChange={setDragPreview}
             />

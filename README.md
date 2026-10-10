@@ -20,7 +20,7 @@ Meowdoku is a standalone Next.js puzzle game. Your goal is to place happy cats o
 - **Campaign Journey Roadmap**: Visual progression path where completing each level sequentially unlocks the next.
 - **5-Step Interactive Onboarding**: Step-by-step introduction for beginners with custom starting difficulty selection.
 - **Hold & Drag Multi-Cell Marking**: Fluid drag interaction to mark empty cells with `✕` without erasing previously marked cells.
-- **Single-Click Cell Cycling**: Click or tap any cell directly to cycle between `Empty ➔ ✕ ➔ 🐱 ➔ Empty`.
+- **Intuitive Tap & Deselect Controls**: Click or tap an empty cell to mark with `✕`, or click a checked box again to immediately deselect it. Double-click or right-click to place or remove a Cat `🐱`.
 - **Active State & Progress Persistence**: Board state, active marks, unlocked levels, and chosen difficulty are automatically saved to `localStorage`.
 - **Intelligent Hint System & Undo**: Step-by-step hints and full move history undo support.
 - **Dark Mode Support**: Seamless light/dark theme switching.

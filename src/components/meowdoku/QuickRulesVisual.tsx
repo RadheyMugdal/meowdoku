@@ -40,7 +40,7 @@ const RULES: RuleDef[] = [
     shortLabel: "Controls",
     badge: "👆",
     title: "Tap Controls",
-    description: "Tap once to mark ✕ (safe). Tap twice to place 🐱. Tap 3 to clear.",
+    description: "Tap once to mark ✕. Tap a marked cell again to deselect. Double-click (or right-click) to place 🐱.",
   },
 ];
 
@@ -229,7 +229,7 @@ export const QuickRulesVisual: React.FC<{ onOpenFullRules?: () => void }> = ({
 
         {activeRule === "controls" && (
           <div className="flex flex-col items-center">
-            {/* Tap Sequence: Empty -> X -> Cat -> Empty */}
+            {/* Tap Sequence: Empty -> X -> Clear */}
             <div className="flex items-center gap-1.5">
               {/* Step 1: Empty */}
               <div className="flex flex-col items-center gap-1">
@@ -246,27 +246,21 @@ export const QuickRulesVisual: React.FC<{ onOpenFullRules?: () => void }> = ({
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#67c5bf] shadow-sm ring-1 ring-white">
                   <span className="text-xs font-black text-white">✕</span>
                 </div>
-                <span className="text-[9px] font-bold text-[#8b746d]">Tap 1: X</span>
+                <span className="text-[9px] font-bold text-[#8b746d]">Tap 1: ✕</span>
               </div>
 
               <span className="text-[10px] font-black text-[#8b746d]">➔</span>
 
-              {/* Step 3: Cat */}
+              {/* Step 3: Deselect */}
               <div className="flex flex-col items-center gap-1">
-                <div className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-[#67c5bf] shadow-sm ring-1 ring-white">
-                  <Image
-                    src="/assets/cat.webp"
-                    alt="Cat"
-                    width={20}
-                    height={20}
-                    className="h-5 w-5 object-contain"
-                  />
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#f8f6ef] ring-1 ring-[#eaded8]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#eaded8]" />
                 </div>
-                <span className="text-[9px] font-bold text-[#559c68]">Tap 2: 🐱</span>
+                <span className="text-[9px] font-bold text-[#559c68]">Tap 2: Clear</span>
               </div>
             </div>
             <span className="mt-1.5 text-[10px] font-black text-[#6f5651]">
-              Tap 3 clears back to empty
+              Double-tap or right-click to place 🐱
             </span>
           </div>
         )}

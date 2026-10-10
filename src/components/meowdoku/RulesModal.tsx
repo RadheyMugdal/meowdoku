@@ -17,17 +17,17 @@ interface Slide {
 const SLIDES: Slide[] = [
   {
     title: "1st click: mark X",
-    body: "Use X to mark a cell that cannot hold a cat.",
+    body: "Click an empty cell to mark ✕. Click it again to deselect.",
     pattern: "click-x",
   },
   {
-    title: "2nd click: place cat",
-    body: "Click the same cell again to place the cat there.",
+    title: "Double click: place cat",
+    body: "Double-click (or right-click) any cell to place a cat 🐱.",
     pattern: "click-cat",
   },
   {
-    title: "3rd click: clear",
-    body: "Click once more to clear the cell and keep solving.",
+    title: "Deselect anytime",
+    body: "Click any marked box or placed cat to clear it back to empty.",
     pattern: "click-clear",
   },
   {
@@ -113,7 +113,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                 />
               </div>
               <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#6f5651] shadow-sm">
-                Click 2: Place Cat 🐱
+                Double-Click / Right-Click: Place Cat 🐱
               </span>
             </div>
           )}
@@ -122,7 +122,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
             <div className="flex flex-col items-center gap-3">
               <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-[#67c5bf] shadow-md ring-2 ring-white" />
               <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-[#6f5651] shadow-sm">
-                Click 3: Clear Cell
+                Click Again: Deselect & Clear
               </span>
             </div>
           )}

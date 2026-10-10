@@ -13,6 +13,7 @@ interface BoardProps {
   isComplete: boolean;
   dragPreview: Set<string>;
   onCellClick: (row: number, col: number) => void;
+  onCellDoubleClick: (row: number, col: number) => void;
   onDragMark: (path: CellCoord[]) => void;
   onDragPreviewChange: (preview: Set<string>) => void;
 }
@@ -27,6 +28,7 @@ export const Board: React.FC<BoardProps> = ({
   isComplete,
   dragPreview,
   onCellClick,
+  onCellDoubleClick,
   onDragMark,
   onDragPreviewChange,
 }) => {
@@ -39,6 +41,12 @@ export const Board: React.FC<BoardProps> = ({
     path: CellCoord[];
   } | null>(null);
   const didDragRef = useRef(false);
+  const lastClickRef = useRef<{
+    row: number;
+    col: number;
+    time: number;
+    initialState: CellState;
+  } | null>(null);
 
   function getCellFromElement(el: Element | null): CellCoord | null {
     const target = el?.closest("[data-meowdoku-cell]");
@@ -64,15 +72,39 @@ export const Board: React.FC<BoardProps> = ({
     onDragPreviewChange(new Set());
 
     if (hasDragged && path.length > 1) {
+      lastClickRef.current = null;
       didDragRef.current = true;
       setTimeout(() => {
         didDragRef.current = false;
       }, 80);
       onDragMark(path);
     } else if (!hasDragged) {
-      // Clean single click / tap on any cell!
       if (!isFixedCat(level, startCell.row, startCell.col)) {
-        onCellClick(startCell.row, startCell.col);
+        const now = Date.now();
+        const last = lastClickRef.current;
+        const isDouble =
+          last !== null &&
+          last.row === startCell.row &&
+          last.col === startCell.col &&
+          now - last.time < 350;
+
+        if (isDouble) {
+          lastClickRef.current = null;
+          if (last.initialState === "cat") {
+            // Already had a cat and double-clicked: it was deselected by click 1, keep it deselected
+          } else {
+            // Double-click places cat!
+            onCellDoubleClick(startCell.row, startCell.col);
+          }
+        } else {
+          lastClickRef.current = {
+            row: startCell.row,
+            col: startCell.col,
+            time: now,
+            initialState: board[startCell.row][startCell.col],
+          };
+          onCellClick(startCell.row, startCell.col);
+        }
       }
     }
   };
@@ -180,6 +212,7 @@ export const Board: React.FC<BoardProps> = ({
           height: "min(calc(100vw - 2.5rem), 460px, calc(100svh - 16.5rem))",
         }}
         data-testid="meowdoku-board"
+        onContextMenu={(e) => e.preventDefault()}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -207,11 +240,23 @@ export const Board: React.FC<BoardProps> = ({
                 data-row={r}
                 data-col={c}
                 aria-label={`row ${r + 1}, column ${c + 1}, region ${regionLetter}, ${effectiveState}`}
-                aria-pressed={effectiveState !== "empty"}
+                onContextMenu={(e) => {
+                  e.preventDefault();
+                  if (!isLocked && !isComplete) onCellDoubleClick(r, c);
+                }}
+                onDoubleClick={(e) => {
+                  e.preventDefault();
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     if (!isLocked) onCellClick(r, c);
+                  } else if (e.key === "c" || e.key === "C") {
+                    e.preventDefault();
+                    if (!isLocked && !isComplete) onCellDoubleClick(r, c);
+                  } else if (e.key === "Backspace" || e.key === "Delete") {
+                    e.preventDefault();
+                    if (!isLocked && board[r][c] !== "empty") onCellClick(r, c);
                   }
                 }}
                 className={`relative aspect-square min-h-0 overflow-hidden border border-white/90 text-[#3d302c] shadow-[0_1px_2px_rgba(87,67,58,0.14)] transition duration-150 sm:border-2 ${
